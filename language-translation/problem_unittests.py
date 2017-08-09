@@ -74,6 +74,9 @@ def test_text_to_ids(text_to_ids):
 def test_model_inputs(model_inputs):
     with tf.Graph().as_default():
         input_data, targets, lr, keep_prob, target_sequence_length, max_target_sequence_length, source_sequence_length = model_inputs()
+        for x in input_data, targets, lr, keep_prob, target_sequence_length, \
+                 max_target_sequence_length, source_sequence_length:
+            pass#x.mark_as_used()
 
         # Check type
         assert input_data.op.type == 'Placeholder',\
@@ -101,13 +104,18 @@ def test_model_inputs(model_inputs):
         assert keep_prob.name == 'keep_prob:0', \
             'Keep Probability has bad name.  Found name {}'.format(keep_prob.name)
 
-        assert tf.assert_rank(input_data, 2, message='Input data has wrong rank')
-        assert tf.assert_rank(targets, 2, message='Targets has wrong rank')
-        assert tf.assert_rank(lr, 0, message='Learning Rate has wrong rank')
-        assert tf.assert_rank(keep_prob, 0, message='Keep Probability has wrong rank')
-        assert tf.assert_rank(target_sequence_length, 1, message='Target Sequence Length has wrong rank')
-        assert tf.assert_rank(max_target_sequence_length, 0, message='Max Target Sequence Length has wrong rank')
-        assert tf.assert_rank(source_sequence_length, 1, message='Source Sequence Lengthhas wrong rank')
+        with tf.control_dependencies([
+                tf.assert_rank(input_data, 2, message='Input data has wrong rank'),
+                tf.assert_rank(targets, 2, message='Targets has wrong rank'),
+                tf.assert_rank(lr, 0, message='Learning Rate has wrong rank'),
+                tf.assert_rank(keep_prob, 0, message='Keep Probability has wrong rank'),
+                tf.assert_rank(target_sequence_length, 1, message='Target Sequence Length has wrong rank'),
+                tf.assert_rank(max_target_sequence_length, 0, message='Max Target Sequence Length has wrong rank'),
+                tf.assert_rank(source_sequence_length, 1, message='Source Sequence Lengthhas wrong rank')]):
+            temp = tf.identity(lr)
+
+        with tf.Session() as sess:
+            sess.run(temp, feed_dict={lr: 0.001, keep_prob:0.5})
 
     _print_success_message()
 
