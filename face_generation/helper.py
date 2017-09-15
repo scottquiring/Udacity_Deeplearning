@@ -218,6 +218,8 @@ class Dataset(object):
 
             yield data_batch / IMAGE_MAX_VALUE - 0.5
 
+    def num_batches(self, batch_size):
+        return len(self.data_files)//batch_size
 
 class DLProgress(tqdm):
     """

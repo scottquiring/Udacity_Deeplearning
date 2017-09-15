@@ -44,15 +44,21 @@ class TmpMock():
     """
     def __init__(self, module, attrib_name):
         self.original_attrib = deepcopy(getattr(module, attrib_name))
-        setattr(module, attrib_name, mock.MagicMock())
+        setattr(module, attrib_name, mock.MagicMock(wraps=getattr(module,attrib_name)))
         self.module = module
         self.attrib_name = attrib_name
 
     def __enter__(self):
+        #self.graph = tf.Graph()
+        #self.graph_default = self.graph.as_default()
+        #self.graph_default.__enter__()
+        
         return getattr(self.module, self.attrib_name)
 
     def __exit__(self, type, value, traceback):
         setattr(self.module, self.attrib_name, self.original_attrib)
+        
+        #self.graph_default.__exit__(type, value, traceback)
 
 
 @test_safe
